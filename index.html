@@ -26,12 +26,26 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1
 .fieldorder{border:1px solid #c2c8cf;background:#fff}.fieldorder-row{display:flex;align-items:center;gap:7px;padding:6px 7px;border-bottom:1px solid #e0e3e6}.fieldorder-row:last-child{border-bottom:0}.fieldorder-row .fieldname{flex:1}.fieldorder-row button{padding:2px 7px}
 .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.previewbox{overflow:auto;background:#d9dde2;border:1px solid #aab2bb;padding:12px;text-align:center}.pagecanvas{background:#fff;box-shadow:0 1px 5px #0004;max-width:100%;height:auto}
 @media(max-width:900px){.content{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--line)}.asset-list{max-height:240px}.grid,.settings-grid{grid-template-columns:1fr}.printgrid{grid-template-columns:1fr 1fr}.search input{width:170px}}
+
+.maintenance-overlay{position:fixed;inset:0;background:rgba(223,227,232,.98);display:none;align-items:center;justify-content:center;z-index:9999}
+.maintenance-overlay.open{display:flex}
+.maintenance-window{width:min(620px,calc(100% - 30px));border:1px solid #7d8792;background:#f7f8fa;box-shadow:0 8px 30px #0005}
+.maintenance-titlebar{height:34px;display:flex;align-items:center;padding:0 10px;border-bottom:1px solid #89939e;background:linear-gradient(#eef2f6,#cbd1d8);font-weight:bold}
+.maintenance-titlebar span{flex:1;text-align:center;margin-right:34px;color:#30363d}
+.maintenance-body{text-align:center;padding:48px 35px}
+.maintenance-icon{font-size:28px;margin-bottom:15px;color:#5d6670}
+.maintenance-body h2{margin:0 0 12px;font-size:21px}
+.maintenance-body p{margin:0 auto;color:#5d6670;max-width:470px;line-height:1.6}
+.maintenance-key{display:inline-block;margin-top:24px;padding:10px 16px;border:1px solid #aeb6c0;background:#fff;font-weight:bold}
+.mdm-toast{position:fixed;right:16px;bottom:16px;width:min(410px,calc(100% - 32px));padding:11px 13px;border:1px solid #89939e;background:#f7f8fa;box-shadow:0 3px 12px #0004;z-index:10000;font-size:12px;color:#30363d}
+.mdm-toast strong{display:block;margin-bottom:4px}
+.mdm-countdown{color:#8b2222;font-weight:bold}
 </style>
 </head>
 <body>
 <div class="app"><div class="window">
 <div class="titlebar"><span class="traffic"><i></i><i></i><i></i></span><span class="title">IT Asset Utility</span></div>
-<div class="menubar"><span class="menu">File</span><span class="menu">Edit</span><span class="menu">Asset</span><span class="menu">Tools</span><span class="menu">Help</span></div>
+<div class="menubar"><span class="menu" id="fileMenu">File</span><span class="menu">Edit</span><span class="menu">Asset</span><span class="menu">Tools</span><span class="menu">Help</span></div>
 <div class="toolbar">
 <button class="tool primary" id="newBtn">＋ New Asset</button><button class="tool" id="scanBtn">▣ Scan / Search</button><button class="tool" id="printBtn">▤ Print Labels…</button><button class="tool" id="backupBtn">💾 Backup</button><span class="toolbar-spacer"></span>
 <div class="search"><input id="search" placeholder="Asset ID, Seriennummer, Modell…" autocomplete="off"><button class="tool" id="clearSearch">Clear</button></div>
@@ -40,6 +54,29 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1
 <div class="content"><aside class="sidebar"><div class="sidehead" id="listTitle">Assets</div><div class="asset-list" id="assetList"></div></aside><main class="main"><div class="pane" id="detail"></div></main></div>
 <div class="statusbar"><span id="countStatus">0 Assets</span><span id="storageStatus">Local Storage: OK</span><span id="lastBackup">Last Backup: –</span></div>
 </div></div>
+
+
+<div class="maintenance-overlay" id="maintenanceOverlay">
+  <div class="maintenance-window">
+    <div class="maintenance-titlebar"><span>IT Asset Utility — Maintenance</span></div>
+    <div class="maintenance-body">
+      <div class="maintenance-icon">⚙</div>
+      <h2>Maintenance Mode</h2>
+      <p>
+        Die IT Asset Utility befindet sich im Wartungsmodus.
+        Damit alle Änderungen korrekt geladen werden, muss das Programm
+        vollständig beendet und anschließend erneut geöffnet werden.
+      </p>
+      <div class="maintenance-key">⌘ + Q&nbsp;&nbsp; → &nbsp;&nbsp;IT Asset Utility erneut öffnen</div>
+    </div>
+  </div>
+</div>
+
+<div class="mdm-toast" id="mdmToast" style="display:none">
+  <strong>IT Asset Utility</strong>
+  <span>IT Asset Utility is currently terminating all sessions, due to planned system maintenance.</span>
+  <span class="mdm-countdown" id="mdmCountdown">20</span>
+</div>
 
 <div class="dialog" id="assetDialog"><div class="dialogbox"><div class="dialoghead" id="assetDialogTitle">New Asset</div><form id="assetForm"><div class="dialogbody"><div class="grid">
 <div class="field"><label>Asset ID *</label><div style="display:flex;gap:5px"><input name="id" required maxlength="6" pattern="[A-Z0-9]{6}" style="flex:1;text-transform:uppercase"><button type="button" class="tool" id="generateIdBtn">↻ Auto-ID</button></div><small style="display:block;color:#5d6670;margin-top:3px">6 Zeichen · A–Z / 0–9 · wird auf Duplikate geprüft</small></div>
@@ -102,6 +139,39 @@ function fmtDate(s){if(!s)return'–';const p=s.split('-');return p.length===3?p
 function fmtDateTime(e){return fmtDate(e.date)+' '+(e.time||'')}
 function openDialog(id){$(id).classList.add('open')}function closeDialog(id){$(id).classList.remove('open')}
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeDialog(b.dataset.close));
+const fileMenu=$('fileMenu');
+let maintenanceMode=false;
+let mdmTimer=null;
+let mdmSeconds=20;
+
+function setMaintenanceMode(enabled){
+  maintenanceMode=enabled;
+  $('maintenanceOverlay').classList.toggle('open',enabled);
+}
+
+function startCloseMdm(){
+  if(mdmTimer) clearInterval(mdmTimer);
+  mdmSeconds=20;
+  $('mdmCountdown').textContent=mdmSeconds;
+  $('mdmToast').style.display='block';
+  mdmTimer=setInterval(()=>{
+    mdmSeconds--;
+    $('mdmCountdown').textContent=Math.max(0,mdmSeconds);
+    if(mdmSeconds<=0){
+      clearInterval(mdmTimer);
+      mdmTimer=null;
+      window.location.href='https://www.google.com';
+    }
+  },1000);
+}
+
+fileMenu.onclick=()=>{
+  const action=prompt('File\\n\\n1 = Maintenance Mode\\n2 = Maintenance Mode deaktivieren\\n3 = Close MDM');
+  if(action==='1') setMaintenanceMode(true);
+  if(action==='2') setMaintenanceMode(false);
+  if(action==='3') startCloseMdm();
+};
+
 
 function render(){renderList();renderDetail();updateStatus();checkBackup()}
 function renderList(){const q=$('search').value.trim().toLowerCase();const arr=state.assets.filter(a=>Object.values(a).some(v=>typeof v==='string'&&v.toLowerCase().includes(q))).sort((a,b)=>a.id.localeCompare(b.id));$('listTitle').textContent=`Assets (${arr.length})`;$('assetList').innerHTML=arr.length?arr.map(a=>`<div class="asset-row ${a.id===selectedId?'sel':''}" data-id="${esc(a.id)}"><strong>${esc(a.id)}</strong><small>${esc(a.type||'Gerät')} · ${esc(a.model||'')}</small></div>`).join(''):'<div class="empty">Keine Assets gefunden.</div>';document.querySelectorAll('.asset-row').forEach(x=>x.onclick=()=>{selectedId=x.dataset.id;currentTab='overview';render()})}
