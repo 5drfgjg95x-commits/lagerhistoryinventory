@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IT Asset Utility</title>
+<style>
+:root{--bg:#dfe3e8;--panel:#f7f8fa;--panel2:#e9edf2;--line:#aeb6c0;--line2:#c8ced6;--text:#20252b;--muted:#5d6670}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font:13px/1.35 Arial,Helvetica,sans-serif;color:var(--text);background:var(--bg)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1400px;margin:18px auto;padding:0 14px 18px}
+.window{border:1px solid #7d8792;background:var(--panel);box-shadow:0 2px 9px #0002}.titlebar{height:34px;display:flex;align-items:center;gap:10px;padding:0 10px;border-bottom:1px solid #89939e;background:linear-gradient(#eef2f6,#cbd1d8);font-weight:bold}
+.traffic{display:flex;gap:5px}.traffic i{width:11px;height:11px;border:1px solid #7d8792;border-radius:50%;background:#e6e9ec;display:block}.title{flex:1;text-align:center;margin-right:55px;color:#30363d}
+.menubar{display:flex;gap:2px;padding:3px 5px;border-bottom:1px solid var(--line);background:#eceff2}.menu{padding:3px 8px}.menu:hover{background:#d7e4f2}
+.toolbar{display:flex;gap:5px;align-items:center;padding:7px;border-bottom:1px solid var(--line);background:#e3e7eb}.tool{padding:5px 9px;border:1px solid #9aa4ae;border-radius:3px;background:linear-gradient(#fff,#d9dee4);box-shadow:inset 0 1px #fff}.tool:active{background:#cfd5db}.tool.primary{background:linear-gradient(#e7f1fc,#bcd4ee);border-color:#7392b2}.tool.danger{color:#8b2222}.toolbar-spacer{flex:1}
+.search{display:flex;gap:5px;align-items:center}.search input{width:280px;padding:5px 7px;border:1px solid #89939e;background:#fff}
+.statusbar{display:flex;gap:18px;padding:4px 8px;border-top:1px solid #aeb5bd;background:#e4e7ea;color:#4c555e;font-size:12px}
+.content{display:grid;grid-template-columns:360px 1fr;min-height:650px}.sidebar{border-right:1px solid var(--line);background:#eef1f4}.sidehead{padding:8px;font-weight:bold;border-bottom:1px solid var(--line)}
+.asset-list{max-height:calc(100vh - 250px);overflow:auto}.asset-row{padding:7px 9px;border-bottom:1px solid #d5dae0;cursor:pointer}.asset-row:hover{background:#e3edf8}.asset-row.sel{background:#cfe0f3;color:#13283e}.asset-row strong{display:block}.asset-row small{color:var(--muted)}
+.main{min-width:0;background:#f8f9fa}.pane{padding:14px}.asset-head{display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line2);padding-bottom:10px}.asset-head h1{font-size:20px;margin:0}.badge{padding:2px 7px;border:1px solid #9aa4ae;background:#e7eaed;border-radius:3px;font-size:11px;font-weight:bold}
+.actions{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px;margin-top:12px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}.field input,.field select,.field textarea{width:100%;border:1px solid #9da6af;background:#fff;padding:5px 6px}.field textarea{min-height:64px;resize:vertical}.wide{grid-column:1/-1}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-top:15px}.tab{padding:6px 11px;border:1px solid transparent;border-bottom:0}.tab.active{background:#fff;border-color:var(--line);font-weight:bold;margin-bottom:-1px}.tabbody{background:#fff;border:1px solid var(--line);border-top:0;padding:10px;min-height:270px}
+.log{border-left:2px solid #9fb4cb;margin-left:8px}.logitem{padding:0 0 12px 12px;position:relative}.logitem:before{content:"";position:absolute;left:-7px;top:3px;width:10px;height:10px;border:1px solid #7890aa;background:#dbe7f3;border-radius:50%}.logmeta{font-size:11px;color:#5d6670}.logtype{font-weight:bold}.logtext{margin-top:2px;white-space:pre-wrap}.empty{color:#6a737d;padding:30px;text-align:center}
+.dialog{position:fixed;inset:0;background:#0004;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}.dialog.open{display:flex}.dialogbox{width:min(760px,100%);max-height:90vh;overflow:auto;border:1px solid #69737d;background:#f3f5f7;box-shadow:0 8px 30px #0005}.dialoghead{padding:8px 10px;background:linear-gradient(#e9edf1,#cbd2d9);border-bottom:1px solid #8b949e;font-weight:bold}.dialogbody{padding:12px}.dialogfoot{display:flex;justify-content:flex-end;gap:6px;padding:8px;border-top:1px solid #c3c9cf;background:#e7eaed}
+.notice{padding:8px;border:1px solid #c0c7cf;background:#eef2f6;margin-bottom:10px}.notice.warn{background:#fff7dc;border-color:#d4b75d;color:#624b00}
+.printgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.printitem{border:1px solid #c2c8cf;background:#fff;padding:7px}.printitem label{display:flex;gap:7px;align-items:center}
+.fieldorder{border:1px solid #c2c8cf;background:#fff}.fieldorder-row{display:flex;align-items:center;gap:7px;padding:6px 7px;border-bottom:1px solid #e0e3e6}.fieldorder-row:last-child{border-bottom:0}.fieldorder-row .fieldname{flex:1}.fieldorder-row button{padding:2px 7px}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.previewbox{overflow:auto;background:#d9dde2;border:1px solid #aab2bb;padding:12px;text-align:center}.pagecanvas{background:#fff;box-shadow:0 1px 5px #0004;max-width:100%;height:auto}
+@media(max-width:900px){.content{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--line)}.asset-list{max-height:240px}.grid,.settings-grid{grid-template-columns:1fr}.printgrid{grid-template-columns:1fr 1fr}.search input{width:170px}}
+</style>
+</head>
+<body>
+<div class="app"><div class="window">
+<div class="titlebar"><span class="traffic"><i></i><i></i><i></i></span><span class="title">IT Asset Utility</span></div>
+<div class="menubar"><span class="menu">File</span><span class="menu">Edit</span><span class="menu">Asset</span><span class="menu">Tools</span><span class="menu">Help</span></div>
+<div class="toolbar">
+<button class="tool primary" id="newBtn">＋ New Asset</button><button class="tool" id="scanBtn">▣ Scan / Search</button><button class="tool" id="printBtn">▤ Print Labels…</button><button class="tool" id="backupBtn">💾 Backup</button><span class="toolbar-spacer"></span>
+<div class="search"><input id="search" placeholder="Asset ID, Seriennummer, Modell…" autocomplete="off"><button class="tool" id="clearSearch">Clear</button></div>
+</div>
+<div id="backupNotice"></div>
+<div class="content"><aside class="sidebar"><div class="sidehead" id="listTitle">Assets</div><div class="asset-list" id="assetList"></div></aside><main class="main"><div class="pane" id="detail"></div></main></div>
+<div class="statusbar"><span id="countStatus">0 Assets</span><span id="storageStatus">Local Storage: OK</span><span id="lastBackup">Last Backup: –</span></div>
+</div></div>
+
+<div class="dialog" id="assetDialog"><div class="dialogbox"><div class="dialoghead" id="assetDialogTitle">New Asset</div><form id="assetForm"><div class="dialogbody"><div class="grid">
+<div class="field"><label>Asset ID *</label><div style="display:flex;gap:5px"><input name="id" required maxlength="6" pattern="[A-Z0-9]{6}" style="flex:1;text-transform:uppercase"><button type="button" class="tool" id="generateIdBtn">↻ Auto-ID</button></div><small style="display:block;color:#5d6670;margin-top:3px">6 Zeichen · A–Z / 0–9 · wird auf Duplikate geprüft</small></div>
+<div class="field"><label>Gerätetyp</label><input name="type" placeholder="Notebook, Monitor…"></div><div class="field"><label>Hersteller</label><input name="manufacturer"></div><div class="field"><label>Modell</label><input name="model"></div><div class="field"><label>Seriennummer</label><input name="serial"></div>
+<div class="field"><label>Status</label><select name="status"><option>ACTIVE</option><option>STORAGE</option><option>REPAIR</option><option>DEFECTIVE</option><option>RETIRED</option><option>LOST</option></select></div>
+<div class="field"><label>Standort</label><input name="location"></div><div class="field"><label>Besitzer</label><input name="owner"></div><div class="field"><label>Kaufdatum</label><input type="date" name="purchaseDate"></div><div class="field"><label>Kaufpreis</label><input type="number" step="0.01" name="purchasePrice"></div><div class="field wide"><label>Notizen</label><textarea name="notes"></textarea></div>
+</div></div><div class="dialogfoot"><button type="button" class="tool" data-close="assetDialog">Cancel</button><button class="tool primary">Save Asset</button></div></form></div></div>
+
+<div class="dialog" id="logDialog"><div class="dialogbox"><div class="dialoghead">New Logbook Entry</div><form id="logForm"><div class="dialogbody"><div class="grid">
+<div class="field"><label>Datum</label><input type="date" name="date" required></div><div class="field"><label>Uhrzeit</label><input type="time" name="time" required></div>
+<div class="field"><label>Typ</label><select name="type"><option>NOTE</option><option>CHECK-IN</option><option>CHECK-OUT</option><option>ASSIGNMENT</option><option>RETURN</option><option>REPAIR</option><option>MAINTENANCE</option><option>STATUS</option><option>OTHER</option></select></div>
+<div class="field"><label>Techniker / Benutzer</label><input name="user"></div><div class="field wide"><label>Eintrag</label><textarea name="text" required autofocus></textarea></div>
+</div></div><div class="dialogfoot"><button type="button" class="tool" data-close="logDialog">Cancel</button><button class="tool primary">Add Entry</button></div></form></div></div>
+
+<div class="dialog" id="printDialog"><div class="dialogbox"><div class="dialoghead">Print Labels</div><div class="dialogbody">
+<div class="notice">Alle ausgewählten Labels werden in <b>eine einzige PDF-Datei</b> gepackt. Die PDF wird in <b>echtem A4 (210 × 297 mm)</b> mit den eingestellten Labelmaßen erzeugt. Beim Drucken im PDF-Viewer bitte <b>„Tatsächliche Größe / 100 %“</b> und <b>keine Anpassung an Seite</b> wählen.</div>
+<div class="settings-grid">
+<div class="field"><label>Labelbreite (mm)</label><input id="pW" type="number" min="15" max="100" step="0.5" value="50"></div><div class="field"><label>Labelhöhe (mm)</label><input id="pH" type="number" min="8" max="80" step="0.5" value="25"></div>
+<div class="field"><label>Horizontaler Abstand (mm)</label><input id="pGX" type="number" min="0" max="20" step="0.5" value="2"></div><div class="field"><label>Vertikaler Abstand (mm)</label><input id="pGY" type="number" min="0" max="20" step="0.5" value="2"></div>
+<div class="field"><label>Seitenrand (mm)</label><input id="pM" type="number" min="0" max="30" step="0.5" value="8"></div><div class="field"><label>Barcode-Höhe (mm)</label><input id="pBH" type="number" min="3" max="30" step="0.5" value="9"></div>
+<div class="field"><label>Schriftgröße (pt)</label><input id="pFS" type="number" min="5" max="18" step="0.5" value="7"></div><div class="field"><label>Format</label><select id="pOri"><option value="portrait">A4 Hochformat</option><option value="landscape">A4 Querformat</option></select></div>
+</div>
+
+<div style="margin-top:12px" class="field"><label>Header-Text</label><input id="pHeaderText" type="text" value="IT DEPARTMENT" placeholder="z. B. IT DEPARTMENT"></div>
+<div style="margin:10px 0">
+<label><input type="checkbox" id="pHeader" checked> Header anzeigen</label>&nbsp;
+<label><input type="checkbox" id="pBarcode" checked> Barcode</label>&nbsp;
+<label><input type="checkbox" id="pBorder" checked> Rahmen</label>
+</div>
+
+<div class="field"><label>Felder auf dem Label</label><div id="printFields" class="printgrid"></div></div>
+<div class="field" style="margin-top:10px"><label>Reihenfolge der Felder</label><div id="fieldOrder" class="fieldorder"></div></div>
+
+<div class="notice" id="packInfo">–</div><div class="previewbox"><canvas class="pagecanvas" id="printPreview" width="794" height="1123"></canvas></div>
+</div><div class="dialogfoot"><button class="tool" data-close="printDialog">Cancel</button><button class="tool primary" id="makePdf">PDF erstellen & herunterladen</button></div></div></div>
+
+<div class="dialog" id="backupDialog"><div class="dialogbox"><div class="dialoghead">Backup & Data</div><div class="dialogbody">
+<div class="notice warn"><b>Wichtig:</b> Die App kann nur speichern, dass du ein Backup bestätigt hast. Sie kann nicht prüfen, ob dein externes File-Storage-Backup tatsächlich erfolgreich war.</div>
+<p>Letzte bestätigte Sicherung: <b id="backupDialogDate">–</b></p><div class="actions"><button class="tool primary" id="confirmBackup">✓ Backup jetzt bestätigt</button><button class="tool" id="exportJson">JSON Backup exportieren</button><button class="tool" id="importJson">JSON Backup importieren</button><input type="file" id="jsonFile" accept="application/json" hidden></div>
+</div><div class="dialogfoot"><button class="tool" data-close="backupDialog">Close</button></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+(()=>{'use strict';
+const KEY='itAssetUtility.v2',BACKUP_KEY='itAssetUtility.backup',$=id=>document.getElementById(id);
+let state=load(),selectedId=state.assets[0]?.id||null,editId=null,currentTab='overview';
+const FIELD_DEFS=[
+ {key:'id',label:'Asset-ID',default:true},{key:'serial',label:'Seriennummer',default:true},{key:'location',label:'Standort',default:false},
+ {key:'type',label:'Gerätetyp',default:false},{key:'manufacturer',label:'Hersteller',default:false},{key:'model',label:'Modell',default:false},
+ {key:'owner',label:'Besitzer',default:false},{key:'status',label:'Status',default:false},{key:'purchaseDate',label:'Kaufdatum',default:false}
+];
+let printFieldOrder=FIELD_DEFS.map(x=>x.key);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function now(){const d=new Date();return{date:d.toISOString().slice(0,10),time:d.toTimeString().slice(0,5)}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{assets:[]}}catch{return{assets:[]}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function getAsset(){return state.assets.find(a=>a.id===selectedId)||null}
+function fmtDate(s){if(!s)return'–';const p=s.split('-');return p.length===3?p.reverse().join('.'):s}
+function fmtDateTime(e){return fmtDate(e.date)+' '+(e.time||'')}
+function openDialog(id){$(id).classList.add('open')}function closeDialog(id){$(id).classList.remove('open')}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeDialog(b.dataset.close));
+
+function render(){renderList();renderDetail();updateStatus();checkBackup()}
+function renderList(){const q=$('search').value.trim().toLowerCase();const arr=state.assets.filter(a=>Object.values(a).some(v=>typeof v==='string'&&v.toLowerCase().includes(q))).sort((a,b)=>a.id.localeCompare(b.id));$('listTitle').textContent=`Assets (${arr.length})`;$('assetList').innerHTML=arr.length?arr.map(a=>`<div class="asset-row ${a.id===selectedId?'sel':''}" data-id="${esc(a.id)}"><strong>${esc(a.id)}</strong><small>${esc(a.type||'Gerät')} · ${esc(a.model||'')}</small></div>`).join(''):'<div class="empty">Keine Assets gefunden.</div>';document.querySelectorAll('.asset-row').forEach(x=>x.onclick=()=>{selectedId=x.dataset.id;currentTab='overview';render()})}
+function renderDetail(){const a=getAsset();if(!a){$('detail').innerHTML='<div class="empty"><b>Kein Asset ausgewählt.</b><br>Scan einen Barcode oder lege ein neues Asset an.</div>';return}
+$('detail').innerHTML=`<div class="asset-head"><div><h1>${esc(a.id)}</h1><div>${esc(a.manufacturer||'')} ${esc(a.model||'')} <span class="badge">${esc(a.status)}</span></div></div><div class="actions"><button class="tool" id="editAsset">Edit</button><button class="tool" id="printOne">Print Label</button><button class="tool" id="deleteAsset">Delete</button></div></div>
+<div class="grid"><div class="field"><label>Gerätetyp</label><div>${esc(a.type||'–')}</div></div><div class="field"><label>Seriennummer</label><div>${esc(a.serial||'–')}</div></div><div class="field"><label>Standort</label><div>${esc(a.location||'–')}</div></div><div class="field"><label>Besitzer</label><div>${esc(a.owner||'–')}</div></div><div class="field"><label>Kaufdatum</label><div>${fmtDate(a.purchaseDate)}</div></div><div class="field"><label>Kaufpreis</label><div>${a.purchasePrice?esc(a.purchasePrice)+' €':'–'}</div></div><div class="field wide"><label>Notizen</label><div>${esc(a.notes||'–')}</div></div></div>
+<div class="tabs"><button class="tab ${currentTab==='overview'?'active':''}" data-tab="overview">Overview</button><button class="tab ${currentTab==='log'?'active':''}" data-tab="log">Logbook (${a.logbook?.length||0})</button></div><div class="tabbody">${currentTab==='log'?renderLog(a):renderOverview(a)}</div>`;
+$('editAsset').onclick=()=>openAssetEditor(a);$('printOne').onclick=()=>openPrint([a.id]);$('deleteAsset').onclick=()=>{if(confirm(`Asset ${a.id} wirklich löschen?`)){state.assets=state.assets.filter(x=>x.id!==a.id);selectedId=state.assets[0]?.id||null;save()}};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{currentTab=b.dataset.tab;renderDetail()});if(currentTab==='log')$('addLog')?.addEventListener('click',()=>openLog(a))}
+function renderOverview(a){const l=a.logbook?.slice(-3).reverse()||[];return`<div><b>Zuletzt:</b> ${l.length?fmtDateTime(l[0]):'Noch keine Logbook-Einträge.'}</div><div style="margin-top:14px"><button class="tool" id="quickLog">＋ Logbook Entry</button></div>`}
+function renderLog(a){return`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="tool primary" id="addLog">＋ New Log Entry</button></div><div class="log">${a.logbook?.length?a.logbook.slice().sort((x,y)=>(y.date+y.time).localeCompare(x.date+x.time)).map(e=>`<div class="logitem"><div class="logmeta"><span class="logtype">${esc(e.type)}</span> · ${fmtDateTime(e)}${e.user?' · '+esc(e.user):''}</div><div class="logtext">${esc(e.text)}</div></div>`).join(''):'<div class="empty">Noch keine Einträge.</div>'}</div>`}
+function updateStatus(){const n=state.assets.length,active=state.assets.filter(a=>a.status==='ACTIVE').length,storage=state.assets.filter(a=>a.status==='STORAGE').length,repair=state.assets.filter(a=>a.status==='REPAIR').length;$('countStatus').textContent=`${n} Assets · ${active} Active · ${storage} Storage · ${repair} Repair`;const b=localStorage.getItem(BACKUP_KEY);$('lastBackup').textContent='Last Backup: '+(b?new Date(b).toLocaleString('de-DE'):'–')}
+function checkBackup(){const b=localStorage.getItem(BACKUP_KEY),due=!b||(Date.now()-Date.parse(b)>7*864e5);$('backupNotice').innerHTML=due?'<div class="notice warn" style="margin:0;border-left:0;border-right:0">⚠ <b>Backup-Erinnerung:</b> Bitte jetzt den File Storage sichern. <button class="tool" id="backupNow">Backup öffnen</button></div>':'';$('backupNow')?.addEventListener('click',()=>openBackup())}
+function generateAssetId(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let id='';do{id='';for(let i=0;i<6;i++)id+=chars[Math.floor(Math.random()*chars.length)]}while(state.assets.some(a=>String(a.id||'').toUpperCase()===id));return id}
+function normalizeAssetId(v){return String(v||'').trim().toUpperCase()}function assetIdExists(id,excludeId=null){const n=normalizeAssetId(id);return state.assets.some(a=>normalizeAssetId(a.id)===n&&a.id!==excludeId)}
+function openAssetEditor(a){editId=a?.id||null;$('assetDialogTitle').textContent=a?'Edit Asset':'New Asset';const f=$('assetForm');f.reset();if(a)Object.keys(a).forEach(k=>{if(f.elements[k]&&k!=='logbook')f.elements[k].value=a[k]??''});else f.elements.id.value=generateAssetId();openDialog('assetDialog');setTimeout(()=>f.elements.id.focus(),30)}
+$('newBtn').onclick=()=>openAssetEditor(null);$('generateIdBtn').onclick=()=>{$('assetForm').elements.id.value=generateAssetId();$('assetForm').elements.id.focus()};$('assetForm').elements.id.oninput=e=>{e.target.value=normalizeAssetId(e.target.value).replace(/[^A-Z0-9]/g,'').slice(0,6)};$('scanBtn').onclick=()=>{$('search').focus();$('search').select()};$('search').oninput=renderList;
+$('search').onkeydown=e=>{if(e.key==='Enter'){const v=$('search').value.trim().toLowerCase(),exact=state.assets.find(a=>a.id.toLowerCase()===v||a.serial?.toLowerCase()===v);if(exact){selectedId=exact.id;currentTab='overview';render()}}};$('clearSearch').onclick=()=>{$('search').value='';renderList()};
+$('assetForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),data=Object.fromEntries(f.entries()),id=normalizeAssetId(data.id);if(!/^[A-Z0-9]{6}$/.test(id)){alert('Die Asset-ID muss exakt 6 Zeichen aus A–Z und 0–9 enthalten.');return}data.id=id;if(assetIdExists(id,editId)){alert('Diese Asset-ID existiert bereits. Bitte eine andere ID verwenden.');return}if(editId){const a=state.assets.find(x=>x.id===editId);Object.assign(a,data);a.logbook=a.logbook||[];selectedId=id}else{state.assets.push({...data,id,logbook:[],createdAt:new Date().toISOString()});selectedId=id}closeDialog('assetDialog');save()};
+function openLog(a){const f=$('logForm');f.reset();const n=now();f.date.value=n.date;f.time.value=n.time;openDialog('logDialog');setTimeout(()=>f.text.focus(),30)}
+$('logForm').onsubmit=e=>{e.preventDefault();const a=getAsset();if(!a)return;const f=new FormData(e.target);a.logbook=a.logbook||[];a.logbook.push(Object.fromEntries(f.entries()));closeDialog('logDialog');currentTab='log';save()};
+function openBackup(){const b=localStorage.getItem(BACKUP_KEY);$('backupDialogDate').textContent=b?new Date(b).toLocaleString('de-DE'):'Noch nie bestätigt';openDialog('backupDialog')}
+$('backupBtn').onclick=openBackup;$('confirmBackup').onclick=()=>{localStorage.setItem(BACKUP_KEY,new Date().toISOString());closeDialog('backupDialog');render()};
+$('exportJson').onclick=()=>{const payload={version:2,exportedAt:new Date().toISOString(),assets:state.assets};download('IT-Asset-Backup.json','application/json',JSON.stringify(payload,null,2));localStorage.setItem(BACKUP_KEY,new Date().toISOString());render()};
+$('importJson').onclick=()=>$('jsonFile').click();$('jsonFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const d=JSON.parse(await file.text());if(!Array.isArray(d.assets))throw Error();state={assets:d.assets};selectedId=state.assets[0]?.id||null;save();closeDialog('backupDialog')}catch{alert('Ungültige Backup-Datei.')}e.target.value=''};
+function download(name,type,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+
+function renderPrintFieldChoices(){
+$('printFields').innerHTML=FIELD_DEFS.map(f=>`<div class="printitem"><label><input type="checkbox" data-print-field="${f.key}" ${f.default?'checked':''}> ${esc(f.label)}</label></div>`).join('');
+document.querySelectorAll('[data-print-field]').forEach(cb=>cb.addEventListener('change',updatePack));
+renderFieldOrder();
+}
+function renderFieldOrder(){
+$('fieldOrder').innerHTML=printFieldOrder.map((key,i)=>{const f=FIELD_DEFS.find(x=>x.key===key);return`<div class="fieldorder-row" data-order-key="${key}"><input type="checkbox" data-print-field-order="${key}"><span class="fieldname">${esc(f.label)}</span><button type="button" class="tool" data-move-up="${key}" ${i===0?'disabled':''}>↑</button><button type="button" class="tool" data-move-down="${key}" ${i===printFieldOrder.length-1?'disabled':''}>↓</button></div>`}).join('');
+document.querySelectorAll('[data-move-up]').forEach(b=>b.onclick=()=>moveField(b.dataset.moveUp,-1));
+document.querySelectorAll('[data-move-down]').forEach(b=>b.onclick=()=>moveField(b.dataset.moveDown,1));
+}
+function moveField(key,delta){const i=printFieldOrder.indexOf(key),j=i+delta;if(i<0||j<0||j>=printFieldOrder.length)return;[printFieldOrder[i],printFieldOrder[j]]=[printFieldOrder[j],printFieldOrder[i]];renderFieldOrder();updatePack()}
+function selectedPrintFields(s){return printFieldOrder.filter(k=>s.fields[k])}
+function printFieldRows(asset,s){const labels={id:'Asset-ID',serial:'Seriennr.',location:'Standort',type:'Gerätetyp',manufacturer:'Hersteller',model:'Modell',owner:'Besitzer',status:'Status',purchaseDate:'Kaufdatum'};const values={id:asset.id,serial:asset.serial,location:asset.location,type:asset.type,manufacturer:asset.manufacturer,model:asset.model,owner:asset.owner,status:asset.status,purchaseDate:fmtDate(asset.purchaseDate)};return selectedPrintFields(s).filter(k=>values[k]!==undefined&&values[k]!==null&&String(values[k]).trim()!=='').map(k=>({label:labels[k],value:String(values[k])}))}
+function openPrint(ids){window.printIds=ids||state.assets.map(a=>a.id);updatePack();openDialog('printDialog')}
+$('printBtn').onclick=()=>openPrint(state.assets.map(a=>a.id));
+
+function settings(){const fields={};document.querySelectorAll('[data-print-field]').forEach(cb=>fields[cb.dataset.printField]=cb.checked);return{w:+$('pW').value,h:+$('pH').value,gx:+$('pGX').value,gy:+$('pGY').value,m:+$('pM').value,bh:+$('pBH').value,fs:+$('pFS').value,ori:$('pOri').value,header:$('pHeader').checked,headerText:$('pHeaderText').value.trim(),barcode:$('pBarcode').checked,border:$('pBorder').checked,fields}}
+function grid(s){const pw=s.ori==='portrait'?210:297,ph=s.ori==='portrait'?297:210,cols=Math.floor((pw-2*s.m+s.gx)/(s.w+s.gx)),rows=Math.floor((ph-2*s.m+s.gy)/(s.h+s.gy));return{pw,ph,cols,rows,per:Math.max(0,cols*rows)}}
+function barcodeRuns(text){if(!window.JsBarcode)throw Error('Barcode-Bibliothek nicht geladen');const target={};JsBarcode(target,text,{format:'CODE128',displayValue:false,margin:0});const data=target.encodings?.[0]?.data;if(!data)throw Error('Barcode konnte nicht erzeugt werden');const runs=[];for(let i=0;i<data.length;){if(data[i]==='1'){let j=i;while(j<data.length&&data[j]==='1')j++;runs.push([i,j-i]);i=j}else i++}return{runs,modules:data.length}}
+function drawCanvasPreview(){const s=settings(),g=grid(s),c=$('printPreview'),ctx=c.getContext('2d'),scale=3;c.width=g.pw*scale;c.height=g.ph*scale;ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);if(!g.per){$('packInfo').textContent='Die Labelgröße passt nicht auf A4.';return}const ids=(window.printIds||[]).slice(0,g.per);$('packInfo').textContent=`${window.printIds?.length||0} Labels · ${g.per} pro Seite · ${Math.ceil((window.printIds?.length||0)/g.per)} Seite(n) · ${g.cols} × ${g.rows}`;ctx.save();ctx.scale(scale,scale);
+ids.forEach((id,i)=>{const asset=state.assets.find(a=>a.id===id);if(!asset)return;const col=i%g.cols,row=Math.floor(i/g.cols),x=s.m+col*(s.w+s.gx),y=s.m+row*(s.h+s.gy);ctx.fillStyle='#fff';ctx.fillRect(x,y,s.w,s.h);if(s.border){ctx.strokeStyle='#8a919b';ctx.lineWidth=.2;ctx.strokeRect(x,y,s.w,s.h)}let yy=y+3;
+if(s.header&&s.headerText){ctx.fillStyle='#444';ctx.font=`bold ${Math.max(5,s.fs*.7)}pt Arial`;ctx.textAlign='center';ctx.fillText(s.headerText,x+s.w/2,yy+2);yy+=4}
+if(s.barcode){try{const b=barcodeRuns(id),mw=Math.min(.55,(s.w-4)/(b.modules+20)),bw=b.modules*mw,bx=x+(s.w-bw)/2,by=yy+1;ctx.fillStyle='#000';b.runs.forEach(r=>ctx.fillRect(bx+r[0]*mw,by,r[1]*mw,s.bh));yy=by+s.bh+2}catch{ctx.fillStyle='#900';ctx.font='6pt Arial';ctx.fillText('BARCODE ERROR',x+s.w/2,yy+5);yy+=8}}
+const rows=printFieldRows(asset,s);ctx.textAlign='left';rows.forEach(r=>{if(yy>y+s.h-2)return;ctx.font=`bold ${Math.max(4.5,s.fs*.65)}pt Arial`;ctx.fillStyle='#555';ctx.fillText(r.label+':',x+2,yy);const lw=ctx.measureText(r.label+':').width;ctx.font=`${Math.max(4.5,s.fs*.65)}pt Arial`;ctx.fillStyle='#000';let value=r.value,maxWidth=s.w-4-lw-2;while(value.length>1&&ctx.measureText(value).width>maxWidth)value=value.slice(0,-1);if(value!==r.value)value=value.slice(0,-1)+'…';ctx.fillText(value,x+2+lw+2,yy);yy+=Math.max(3.5,s.fs*.75)})});ctx.restore()}
+function updatePack(){drawCanvasPreview()}
+['pW','pH','pGX','pGY','pM','pBH','pFS','pOri','pHeader','pHeaderText','pBarcode','pBorder'].forEach(id=>{$(id).addEventListener('input',updatePack);$(id).addEventListener('change',updatePack)});
+
+function safeFileDate(){const d=new Date();const pad=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+$('makePdf').onclick=()=>{try{makePdf()}catch(e){alert('PDF konnte nicht erstellt werden: '+e.message)}};
+function makePdf(){const s=settings(),g=grid(s),ids=(window.printIds||[]).filter(id=>state.assets.some(a=>a.id===id));if(!g.per)throw Error('Die Labelgröße passt nicht auf A4.');if(!ids.length)throw Error('Keine Assets ausgewählt.');if(s.w<=0||s.h<=0||s.m<0||s.gx<0||s.gy<0)throw Error('Ungültige Druckmaße.');const{jsPDF}=window.jspdf,doc=new jsPDF({orientation:s.ori,unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});doc.setProperties({title:'IT Asset Labels',subject:'1:1 A4 Asset Labels'});const cache=new Map();
+ids.forEach((id,index)=>{if(index>0&&index%g.per===0)doc.addPage('a4',s.ori);const k=index%g.per,col=k%g.cols,row=Math.floor(k/g.cols),x=s.m+col*(s.w+s.gx),y=s.m+row*(s.h+s.gy);if(x+s.w>g.pw+.01||y+s.h>g.ph+.01)throw Error('Label liegt außerhalb der A4-Seite.');if(s.border){doc.setDrawColor(135,143,152);doc.setLineWidth(.2);doc.rect(x,y,s.w,s.h)}let yy=y+3;
+if(s.header&&s.headerText){doc.setFont('helvetica','bold');doc.setFontSize(Math.max(5,s.fs*.7));doc.setTextColor(65,65,65);doc.text(s.headerText,x+s.w/2,yy,{align:'center',maxWidth:s.w-4});yy+=3.5}
+if(s.barcode){let b=cache.get(id);if(!b){b=barcodeRuns(id);cache.set(id,b)}const mw=Math.min(.55,(s.w-4)/(b.modules+20)),bw=b.modules*mw,bx=x+(s.w-bw)/2,by=yy+1;doc.setFillColor(0);b.runs.forEach(r=>doc.rect(bx+r[0]*mw,by,r[1]*mw,s.bh,'F'));yy=by+s.bh+2}
+const asset=state.assets.find(a=>a.id===id);if(asset){const rows=printFieldRows(asset,s);rows.forEach(r=>{if(yy>y+s.h-2)return;doc.setFont('helvetica','bold');doc.setFontSize(Math.max(4.5,s.fs*.65));doc.setTextColor(80,80,80);const label=r.label+':';doc.text(label,x+2,yy);const lw=doc.getTextWidth(label);doc.setFont('helvetica','normal');doc.setFontSize(Math.max(4.5,s.fs*.65));doc.setTextColor(0,0,0);let value=r.value,maxWidth=s.w-4-lw-2;while(value.length>1&&doc.getTextWidth(value)>maxWidth)value=value.slice(0,-1);if(value!==r.value)value=value.slice(0,-1)+'…';doc.text(value,x+2+lw+2,yy);yy+=Math.max(3.5,s.fs*.75)})}});
+const filename=`AssetUtility_${safeFileDate()}_LABEL.pdf`;doc.save(filename)}
+renderPrintFieldChoices();render();
+})();
+</script>
+</body>
+</html>
